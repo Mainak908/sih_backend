@@ -2,7 +2,8 @@ const catchAsyncError = require("../middleware/catchAsyncError");
 const sendToken = require("../utils/jwtToken");
 const ErrorHandler = require("../utils/errorHandler");
 const Stores = require("../models/geolocation");
-const connectDB = require("../config/database");
+const Useracc = require("../models/userAccModel");
+const checkAuth = require("../utils/checkAuth");
 
 //register a user
 exports.registerUser = catchAsyncError(async (req, res, next) => {
@@ -13,7 +14,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
     email,
     password,
   });
-  sendToken(user, 201, res);
+  sendToken(user, 201, res, "successfully registered");
 });
 
 //loginUser
@@ -24,7 +25,7 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
   if (!email || !password) {
     return next(new ErrorHandler("Please enter Email & Password", 400));
   }
-  const user = await User.findOne({ email }).select("+password");
+  const user = await Useracc.findOne({ email }).select("+password");
 
   if (!user) {
     return next(new ErrorHandler("Invalid email & password", 401));
@@ -34,7 +35,7 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Invalid email & password", 401));
   }
-  sendToken(user, 200, res);
+  sendToken(user, 200, res, "successfully logged in");
 });
 
 //Logout User
@@ -95,4 +96,15 @@ exports.registerStore = catchAsyncError(async (req, res, next) => {
     location,
   });
   res.send({ success: true });
+});
+
+exports.aboutUser = catchAsyncError(async (req, res, next) => {
+  const user = await checkAuth(req);
+
+  if (!user) return next(new ErrorHandler("Login First", 401));
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
 });

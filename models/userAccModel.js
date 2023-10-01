@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: "user",
+    default: "nuser",
   },
   createdAt: {
     type: Date,
@@ -51,9 +51,7 @@ userSchema.pre("save", async function (next) {
 
 //JWT token
 userSchema.methods.getJWTToken = function () {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
-  });
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET);
 };
 // comparePassword
 userSchema.methods.comparePassword = async function (enteredPassword) {
