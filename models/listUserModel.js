@@ -5,25 +5,22 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
-    ref: "User",
+    ref: "Useracc",
     required: true,
   },
   token: {
     type: Number,
     required: true,
   },
-  images: [
-    {
-      public_id: {
-        type: String,
-        required: true,
-      },
-      url: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
+  address: {
+    type: String,
+    required: true,
+  },
+
+  public_id: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("Userlist", userSchema);

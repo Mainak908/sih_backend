@@ -4,6 +4,8 @@ const ErrorHandler = require("../utils/errorHandler");
 const Stores = require("../models/geolocation");
 const Useracc = require("../models/userAccModel");
 const checkAuth = require("../utils/checkAuth");
+const Listuser = require("../models/listUserModel");
+const jwt = require("jsonwebtoken");
 
 //register a user
 exports.registerUser = catchAsyncError(async (req, res, next) => {
@@ -41,18 +43,18 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
 //Logout User
 
 exports.logoutUser = catchAsyncError(async (req, res, next) => {
-  res.cookie("token", null, {
-    expires: new Date(Date.now()),
-    httpOnly: false,
-    secure: true,
-    sameSite: "None",
-    withCredentials: true,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Logged Out",
-  });
+  res
+    .cookie("myCookie", null, {
+      expires: new Date(Date.now()),
+      httpOnly: false,
+      secure: true,
+      sameSite: "None",
+      withCredentials: true,
+    })
+    .status(200)
+    .json({
+      success: true,
+    });
 });
 
 //find nearest store
@@ -74,8 +76,6 @@ exports.find_store = catchAsyncError(async (req, res) => {
         },
       },
     ]);
-
-    // await Stores.createIndex({ location: "2dsphere" });
 
     res.status(200).send({ success: true, data: store_data });
   } catch (error) {
@@ -101,10 +101,42 @@ exports.registerStore = catchAsyncError(async (req, res, next) => {
 exports.aboutUser = catchAsyncError(async (req, res, next) => {
   const user = await checkAuth(req);
 
-  if (!user) return next(new ErrorHandler("Login First", 401));
+  if (!user) return new ErrorHandler("Login First", 401);
 
   res.status(200).json({
     success: true,
     user,
+  });
+});
+
+exports.submissuser = catchAsyncError(async (req, res, next) => {
+  const user = await checkAuth(req);
+  const { token, address, public_id } = req.body;
+
+  const resp = await Listuser.create({
+    user: user._id,
+    token,
+    address,
+    public_id,
+  });
+  res.status(200).json({
+    success: true,
+  });
+});
+
+exports.allsubmissuserdetails = catchAsyncError(async (req, res, next) => {
+  const resp = await Listuser.find({});
+  res.json({
+    success: true,
+    resp,
+  });
+});
+
+exports.deleteuserdetails = catchAsyncError(async (req, res, next) => {
+  const { token } = req.body;
+  const resp = await Listuser.deleteOne({ token });
+  res.json({
+    success: true,
+    resp,
   });
 });
