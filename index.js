@@ -44,7 +44,9 @@ app.use(fileUpload());
 connectDB();
 
 const user = require("./routes/userroutes");
+const product = require("./routes/prodroutes");
 app.use("/api/v1", user);
+app.use("/api/v1", product);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is working on http://localhost:${process.env.PORT}`);
